@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>EventSphere — Login</title>
+    <link rel="stylesheet" href="css/style.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+</head>
+<body class="auth-body">
+
+    <div class="auth-container">
+        <div class="auth-logo">
+            <i class="fa-solid fa-calendar-check"></i>
+            <span>EventSphere</span>
+        </div>
+
+        <div class="auth-tabs">
+            <button class="auth-tab active" onclick="switchAuthTab('login')">Login</button>
+            <button class="auth-tab" onclick="switchAuthTab('signup')">Sign Up</button>
+        </div>
+
+        <div id="auth-login">
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" id="login-email" placeholder="your@email.com"/>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="login-password" placeholder="Enter your password"/>
+            </div>
+            <button class="btn-primary w-full" onclick="handleLogin()">
+                <i class="fa-solid fa-arrow-right-to-bracket"></i> Login
+            </button>
+            <div id="login-msg" class="msg-box" style="display:none;"></div>
+        </div>
+
+        <div id="auth-signup" style="display:none;">
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="signup-name" placeholder="Your full name"/>
+            </div>
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" id="signup-email" placeholder="your@email.com"/>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="signup-password" placeholder="Create a password"/>
+            </div>
+            <div class="form-group">
+                <label>Register as</label>
+                <select id="signup-role">
+                    <option value="student">Student</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+            <button class="btn-primary w-full" onclick="handleSignup()">
+                <i class="fa-solid fa-user-plus"></i> Create Account
+            </button>
+            <div id="signup-msg" class="msg-box" style="display:none;"></div>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://localhost:3000/api';
+
+        function switchAuthTab(tab) {
+            document.querySelectorAll('.auth-tab').forEach(b => b.classList.remove('active'));
+            document.getElementById('auth-login').style.display  = tab === 'login'  ? 'block' : 'none';
+            document.getElementById('auth-signup').style.display = tab === 'signup' ? 'block' : 'none';
+            event.target.classList.add('active');
+        }
+
+        async function handleLogin() {
+            const email    = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+
+            if (!email || !password) {
+                showMsg('login-msg', 'Please fill in all fields.', 'error');
+                return;
+            }
+
+            const res  = await fetch(`${API}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+                credentials: 'include'
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+                window.location.href = 'index.html';
+            } else {
+                showMsg('login-msg', data.error, 'error');
+            }
+        }
+
+        async function handleSignup() {
+            const name     = document.getElementById('signup-name').value.trim();
+            const email    = document.getElementById('signup-email').value.trim();
+            const password = document.getElementById('signup-password').value;
+            const role     = document.getElementById('signup-role').value;
+
+            if (!name || !email || !password) {
+                showMsg('signup-msg', 'Please fill in all fields.', 'error');
+                return;
+            }
+
+            const res  = await fetch(`${API}/auth/signup`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, password, role }),
+                credentials: 'include'
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+                showMsg('signup-msg', data.message + ' Please login.', 'success');
+                setTimeout(() => switchAuthTab('login'), 1500);
+            } else {
+                showMsg('signup-msg', data.error, 'error');
+            }
+        }
+
+        function showMsg(id, text, type) {
+            const el = document.getElementById(id);
+            el.textContent   = text;
+            el.className     = 'msg-box ' + type;
+            el.style.display = 'block';
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const loginVisible = document.getElementById('auth-login').style.display !== 'none';
+                loginVisible ? handleLogin() : handleSignup();
+            }
+        });
+    </script>
+</body>
+</html>
