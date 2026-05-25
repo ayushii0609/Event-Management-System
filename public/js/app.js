@@ -1,4 +1,4 @@
-const API = 'http://localhost:3000/api';
+const API = 'https://event-management-system-production-288f.up.railway.app/api';
 let currentEventId = null;
 let currentUser    = null;
 
