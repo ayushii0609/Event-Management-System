@@ -1,18 +1,18 @@
-
 const mysql = require('mysql2');
+
 const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'ayushi@123#',
-    database: 'event_management'
+    host: process.env.MYSQLHOST,
+    user: process.env.MYSQLUSER,
+    password: process.env.MYSQLPASSWORD,
+    database: process.env.MYSQLDATABASE,
+    port: process.env.MYSQLPORT
 });
 
-// Try to connect and show result in console
 db.connect((err) => {
     if (err) {
-        console.log('❌ Database connection failed:', err.message);
+        console.log('Database connection failed:', err.message);
     } else {
-        console.log('✅ Connected to MySQL database!');
+        console.log('Connected to MySQL database!');
     }
 });
 
